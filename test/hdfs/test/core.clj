@@ -74,26 +74,26 @@
 (deftest test-file-size
   (is (pos? (file-size "project.clj"))))
 
-(deftest test-list-files
-  (delete "/tmp/test-list-files")
-  (make-directory "/tmp/test-list-files")
-  (make-directory "/tmp/test-list-files/1")
-  (make-directory "/tmp/test-list-files/2")
-  (spit "/tmp/test-list-files/1/a.txt" "a")
-  (spit "/tmp/test-list-files/2/b.txt" "b")
-  (let [status (list-files "/tmp/test-list-files")]
+(deftest test-list-file-status
+  (delete "/tmp/test-list-file-status")
+  (make-directory "/tmp/test-list-file-status")
+  (make-directory "/tmp/test-list-file-status/1")
+  (make-directory "/tmp/test-list-file-status/2")
+  (spit "/tmp/test-list-file-status/1/a.txt" "a")
+  (spit "/tmp/test-list-file-status/2/b.txt" "b")
+  (let [status (list-file-status "/tmp/test-list-file-status")]
     (is (= 2 (count status)))
     (is (every? #(instance? FileStatus %1) status))
-    (is (= ["file:/tmp/test-list-files/2"
-            "file:/tmp/test-list-files/1"]
+    (is (= ["file:/tmp/test-list-file-status/2"
+            "file:/tmp/test-list-file-status/1"]
            (map  #(str (.getPath %1)) status))))
-  (let [status (list-files "/tmp/test-list-files" true)]
+  (let [status (list-file-status "/tmp/test-list-file-status" true)]
     (is (= 4 (count status)))
     (is (every? #(instance? FileStatus %1) status))
-    (is (= ["file:/tmp/test-list-files/2"
-            "file:/tmp/test-list-files/2/b.txt"
-            "file:/tmp/test-list-files/1"
-            "file:/tmp/test-list-files/1/a.txt"]
+    (is (= ["file:/tmp/test-list-file-status/2"
+            "file:/tmp/test-list-file-status/2/b.txt"
+            "file:/tmp/test-list-file-status/1"
+            "file:/tmp/test-list-file-status/1/a.txt"]
            (map  #(str (.getPath %1)) status)))))
 
 (deftest test-make-path
