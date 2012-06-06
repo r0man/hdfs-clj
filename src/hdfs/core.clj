@@ -99,6 +99,10 @@ and subsequent args as children relative to the parent."
   "Open `path` and return a BufferedWriter."
   [path] (BufferedWriter. (OutputStreamWriter. (output-stream path))))
 
+(defn path?
+  "Returns true if `arg` is a Path, otherwise false."
+  [arg] (instance? Path arg))
+
 (defn ^PrintWriter print-writer
   "Open `path` and return a BufferedWriter."
   [path] (PrintWriter. (output-stream path)))

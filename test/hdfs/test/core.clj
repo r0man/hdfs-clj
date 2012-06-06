@@ -115,6 +115,12 @@
   (let [filesystem (filesystem "file://./tmp")]
     (is (instance? LocalFileSystem filesystem))))
 
+(deftest test-path?
+  (is (not (path? nil)))
+  (is (not (path? "")))
+  (is (not (path? "/tmp")))
+  (is (path? (make-path "/tmp"))))
+
 (deftest test-read-lines
   (let [path "/tmp/test-read-lines"]
     (spit path "1\n2\n")
