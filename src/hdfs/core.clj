@@ -30,7 +30,7 @@ and subsequent args as children relative to the parent."
 (defn make-parents
   "Make the given path and all non-existent parents into directories."
   [path]
-  (let [parent (.getParent (make-path path))]
+  (if-let [parent (.getParent (make-path path))]
     (.mkdirs (filesystem parent) parent)))
 
 (defn exists?
