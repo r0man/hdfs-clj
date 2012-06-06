@@ -29,9 +29,11 @@ and subsequent args as children relative to the parent."
 
 (defn make-parents
   "Make the given path and all non-existent parents into directories."
-  [path]
+  [path & [permissions]]
   (if-let [parent (.getParent (make-path path))]
-    (.mkdirs (filesystem parent) parent)))
+    (if permissions
+      (.mkdirs (filesystem parent) parent permissions)
+      (.mkdirs (filesystem parent) parent))))
 
 (defn exists?
   "Returns true if `path` exists, otherwise false."

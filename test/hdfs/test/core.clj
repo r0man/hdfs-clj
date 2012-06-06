@@ -114,8 +114,9 @@
   (is (not (make-parents "/")))
   (is (make-parents "/tmp/test-make-parents"))
   (is (not (exists? "/tmp/test-make-parents")))
-  (is (make-parents "/tmp/test-make-parents/sub"))
-  (is (exists? "/tmp/test-make-parents")))
+  (is (make-parents "/tmp/test-make-parents/sub1/sub2"))
+  (is (exists? "/tmp/test-make-parents"))
+  (is (exists? "/tmp/test-make-parents/sub1")))
 
 (deftest test-filesystem
   (let [filesystem (filesystem "/tmp")]
