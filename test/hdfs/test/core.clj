@@ -74,6 +74,28 @@
 (deftest test-file-size
   (is (pos? (file-size "project.clj"))))
 
+(deftest test-list-files
+  (delete "/tmp/test-list-files")
+  (make-directory "/tmp/test-list-files")
+  (make-directory "/tmp/test-list-files/1")
+  (make-directory "/tmp/test-list-files/2")
+  (spit "/tmp/test-list-files/1/a.txt" "a")
+  (spit "/tmp/test-list-files/2/b.txt" "b")
+  (let [status (list-files "/tmp/test-list-files")]
+    (is (= 2 (count status)))
+    (is (every? #(instance? FileStatus %1) status))
+    (is (= ["file:/tmp/test-list-files/2"
+            "file:/tmp/test-list-files/1"]
+           (map  #(str (.getPath %1)) status))))
+  (let [status (list-files "/tmp/test-list-files" true)]
+    (is (= 4 (count status)))
+    (is (every? #(instance? FileStatus %1) status))
+    (is (= ["file:/tmp/test-list-files/2"
+            "file:/tmp/test-list-files/2/b.txt"
+            "file:/tmp/test-list-files/1"
+            "file:/tmp/test-list-files/1/a.txt"]
+           (map  #(str (.getPath %1)) status)))))
+
 (deftest test-make-path
   (is (thrown? IllegalArgumentException (make-path nil)))
   (is (thrown? IllegalArgumentException (make-path "")))

@@ -65,6 +65,16 @@ and subsequent args as children relative to the parent."
   (if-let [status (file-status path)]
     (.getLen status)))
 
+(defn list-files
+  "List the files in directory."
+  [path & [recursively]]
+  (if recursively    
+    (mapcat #(if (directory? (.getPath %1))
+               (cons %1 (list-files (.getPath %1) true))
+               [%1])
+            (list-files path false))
+    (seq (.listStatus (filesystem path) (make-path path)))))
+
 (defn ^FSDataInputStream input-stream
   "Open `path` and return a FSDataInputStream."
   [path]
