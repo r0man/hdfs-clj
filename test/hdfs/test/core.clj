@@ -109,6 +109,13 @@
   (is (make-directory "/tmp/make-directory"))
   (is (make-directory "/tmp/make-directory/and-sub-directories")))
 
+(deftest test-make-parents
+  (delete "/tmp/test-make-parents")
+  (is (make-parents "/tmp/test-make-parents"))
+  (is (not (exists? "/tmp/test-make-parents")))
+  (is (make-parents "/tmp/test-make-parents/sub"))
+  (is (not (exists? "/tmp/test-make-parents"))))
+
 (deftest test-filesystem
   (let [filesystem (filesystem "/tmp")]
     (is (instance? LocalFileSystem filesystem)))
