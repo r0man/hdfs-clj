@@ -24,6 +24,16 @@
   (is (instance? GzipCodec (compression-codec "/tmp/seed.gz")))
   (is (instance? BZip2Codec (compression-codec "/tmp/seed.bz2"))))
 
+(deftest test-copy-from-local-file
+  (let [source (make-path "project.clj")
+        target (make-path "/tmp/test-copy-from-local-file")]
+    (is (= [source target] (copy-from-local-file source target)))))
+
+(deftest test-copy-to-local-file
+  (let [source (make-path "project.clj")
+        target (make-path "/tmp/test-copy-to-local-file")]
+    (is (= [source target] (copy-to-local-file source target)))))
+
 (deftest test-input-stream
   (let [stream (input-stream "project.clj")]
     (is (instance? FSDataInputStream stream))))

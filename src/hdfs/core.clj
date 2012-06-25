@@ -1,6 +1,6 @@
 (ns hdfs.core
   (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
-           [org.apache.hadoop.fs FileSystem FSDataInputStream FSDataOutputStream Path]
+           [org.apache.hadoop.fs FileSystem FSDataInputStream FSDataOutputStream LocalFileSystem Path]
            [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory]
            org.apache.hadoop.conf.Configuration
            org.apache.hadoop.io.SequenceFile$Reader
@@ -22,6 +22,22 @@ and subsequent args as children relative to the parent."
   "Returns the Hadoop filesystem from `path`."
   [path & configuration]
   (FileSystem/get (.toUri (make-path path)) (or configuration (Configuration.))))
+
+(defn copy-from-local-file
+  "Copy the local file from `source` to `destination`."
+  [source destination & {:keys [overwrite]}]
+  (let [source (make-path source)
+        destination (make-path destination)]
+    (.copyFromLocalFile (filesystem destination) (or overwrite false) source destination)
+    [source destination]))
+
+(defn copy-to-local-file
+  "Copy the file from `source` to `destination` on the local filesystem."
+  [source destination]
+  (let [source (make-path source)
+        destination (make-path destination)]
+    (.copyToLocalFile (filesystem source) source destination)
+    [source destination]))
 
 (defn make-directory
   "Make the given path and all non-existent parents into directories."
@@ -76,7 +92,7 @@ and subsequent args as children relative to the parent."
 (defn list-file-status
   "List the status of all files in directory."
   [path & [recursively]]
-  (if recursively    
+  (if recursively
     (mapcat #(if (directory? (.getPath %1))
                (cons %1 (list-file-status (.getPath %1) true))
                [%1])
