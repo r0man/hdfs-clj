@@ -34,6 +34,13 @@
         target (make-path "/tmp/test-copy-to-local-file")]
     (is (= [source target] (copy-to-local-file source target)))))
 
+(deftest test-copy-merge
+  (make-directory "/tmp/test-copy-merge/in")
+  (spit "/tmp/test-copy-merge/in/part-00000" "1\n")
+  (spit "/tmp/test-copy-merge/in/part-00001" "2\n")
+  (copy-merge "/tmp/test-copy-merge/in" "/tmp/test-copy-merge/out" :overwrite true)
+  (is (= "1\n2\n" (slurp "/tmp/test-copy-merge/out"))))
+
 (deftest test-input-stream
   (let [stream (input-stream "project.clj")]
     (is (instance? FSDataInputStream stream))))

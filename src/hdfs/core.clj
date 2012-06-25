@@ -1,6 +1,6 @@
 (ns hdfs.core
   (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
-           [org.apache.hadoop.fs FileSystem FSDataInputStream FSDataOutputStream LocalFileSystem Path]
+           [org.apache.hadoop.fs FileSystem FileUtil FSDataInputStream FSDataOutputStream LocalFileSystem Path]
            [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory]
            org.apache.hadoop.conf.Configuration
            org.apache.hadoop.io.SequenceFile$Reader
@@ -22,22 +22,6 @@ and subsequent args as children relative to the parent."
   "Returns the Hadoop filesystem from `path`."
   [path & configuration]
   (FileSystem/get (.toUri (make-path path)) (or configuration (Configuration.))))
-
-(defn copy-from-local-file
-  "Copy the local file from `source` to `destination`."
-  [source destination & {:keys [overwrite]}]
-  (let [source (make-path source)
-        destination (make-path destination)]
-    (.copyFromLocalFile (filesystem destination) (or overwrite false) source destination)
-    [source destination]))
-
-(defn copy-to-local-file
-  "Copy the file from `source` to `destination` on the local filesystem."
-  [source destination]
-  (let [source (make-path source)
-        destination (make-path destination)]
-    (.copyToLocalFile (filesystem source) source destination)
-    [source destination]))
 
 (defn make-directory
   "Make the given path and all non-existent parents into directories."
@@ -70,6 +54,36 @@ and subsequent args as children relative to the parent."
 (defn ^CompressionCodec compression-codec
   "Returns the compression codec for path."
   [path] (.getCodec (CompressionCodecFactory. (Configuration.)) (make-path path)))
+
+(defn copy-from-local-file
+  "Copy the local file from `source` to `destination`."
+  [source destination & {:keys [overwrite]}]
+  (let [source (make-path source)
+        destination (make-path destination)]
+    (.copyFromLocalFile (filesystem destination) (or overwrite false) source destination)
+    [source destination]))
+
+(defn copy-to-local-file
+  "Copy the file from `source` to `destination` on the local filesystem."
+  [source destination]
+  (let [source (make-path source)
+        destination (make-path destination)]
+    (.copyToLocalFile (filesystem source) source destination)
+    [source destination]))
+
+(defn copy-merge
+  "Copy all files in `source-dir` to the output file `destination`."
+  [source-dir destination & {:keys [delete-source overwrite]}]
+  (let [source-fs (filesystem source-dir)
+        destination-fs (filesystem destination)]
+    (when overwrite
+      (delete destination))
+    (FileUtil/copyMerge
+     source-fs (make-path source-dir)
+     destination-fs (make-path destination)
+     (or delete-source false)
+     (Configuration.)
+     nil)))
 
 (defn glob-status
   "Return all the files that match `pattern` and are not checksum files."
