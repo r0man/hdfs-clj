@@ -1,5 +1,6 @@
 (ns hdfs.tool
   (:import org.apache.hadoop.conf.Configuration
+           org.apache.hadoop.util.GenericOptionsParser
            org.apache.hadoop.util.ToolRunner))
 
 (defmacro deftool [[tool args] & body]
@@ -16,7 +17,8 @@
        (defn ~'-init []
          [[] (atom nil)])
        (defn ~'-run [~tool ~args]
-         (let [result# (do ~@body)]
+         (let [~args (seq (.getRemainingArgs (GenericOptionsParser. ~args)))
+               result# (do ~@body)]
            (if (number? result#)
              result# 0)))
        (defn ~'-main [& ~'args]
