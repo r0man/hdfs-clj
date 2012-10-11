@@ -151,3 +151,12 @@
   (let [path "/tmp/test-read-lines"]
     (spit path "1\n2\n")
     (is (= ["1" "2"] (read-lines path)))))
+
+(deftest test-part-file-seq
+  (make-directory "/tmp/test-part-file-seq/logs")
+  (spit "/tmp/test-part-file-seq/part-00001" "1\n")
+  (spit "/tmp/test-part-file-seq/part-00002" "1\n")
+  (let [paths (map str (part-file-seq "/tmp/test-part-file-seq"))]
+    (is (= 2 (count paths)))
+    (is (contains? (set paths) "file:/tmp/test-part-file-seq/part-00001"))
+    (is (contains? (set paths) "file:/tmp/test-part-file-seq/part-00002"))))

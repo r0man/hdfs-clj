@@ -113,6 +113,15 @@ and subsequent args as children relative to the parent."
             (list-file-status path false))
     (seq (.listStatus (filesystem path) (make-path path)))))
 
+(defn part-file-seq
+  "Returns a seq of part files in `directory`"
+  [directory & [recursively]]
+  (for [status (list-file-status directory recursively)
+        :let [path (.getPath status)]
+        :when (and (not (directory? path))
+                   (re-matches #".*/part-.*" (str path)))]
+    path))
+
 (defn ^FSDataInputStream input-stream
   "Open `path` and return a FSDataInputStream."
   [path]
