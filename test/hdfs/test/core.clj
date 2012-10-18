@@ -41,6 +41,10 @@
   (copy-merge "/tmp/test-copy-merge/in" "/tmp/test-copy-merge/out" :overwrite true)
   (is (= "1\n2\n" (slurp "/tmp/test-copy-merge/out"))))
 
+(deftest test-crc-filename
+  (is (= "/tmp/.0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2.crc"
+         (crc-filename "/tmp/0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2"))))
+
 (deftest test-input-stream
   (let [stream (input-stream "project.clj")]
     (is (instance? FSDataInputStream stream))))

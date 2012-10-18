@@ -5,7 +5,8 @@
            org.apache.hadoop.conf.Configuration
            org.apache.hadoop.io.SequenceFile$Reader
            org.apache.hadoop.util.ReflectionUtils)
-  (:use [clojure.string :only (join split)]))
+  (:require [clojure.java.io :refer [file delete-file]]
+            [clojure.string :refer [join split]]))
 
 (defn ^Path make-path
   "Returns a org.apache.hadoop.fs.Path, passing each arg to
@@ -84,6 +85,10 @@ and subsequent args as children relative to the parent."
      (or delete-source false)
      (Configuration.)
      nil)))
+
+(defn crc-filename [filename]
+  (let [file (file filename)]
+    (str (.getParent file) "/." (.getName file) ".crc")))
 
 (defn glob-status
   "Return all the files that match `pattern` and are not checksum files."
