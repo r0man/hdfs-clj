@@ -2,7 +2,9 @@
   (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
            [org.apache.hadoop.fs LocalFileSystem FileStatus FileSystem FSDataInputStream FSDataOutputStream Path]
            [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory BZip2Codec GzipCodec]
-           org.apache.hadoop.conf.Configuration)
+           org.apache.hadoop.conf.Configuration
+           org.apache.hadoop.io.LongWritable
+           org.apache.hadoop.io.SequenceFile$Writer)
   (:use [clojure.string :only (join)]
         clojure.test
         hdfs.core))
@@ -14,6 +16,9 @@
 (deftest test-buffered-writer
   (let [writer (buffered-writer "/tmp/buffered-writer")]
     (is (instance? BufferedWriter writer))))
+
+(deftest test-configuration
+  (is (instance? Configuration (configuration))))
 
 (deftest test-print-writer
   (let [writer (print-writer "/tmp/print-writer")]
@@ -39,7 +44,7 @@
   (spit "/tmp/test-copy-merge/in/part-00000" "1\n")
   (spit "/tmp/test-copy-merge/in/part-00001" "2\n")
   (copy-merge "/tmp/test-copy-merge/in" "/tmp/test-copy-merge/out" :overwrite true)
-  (is (= "1\n2\n" (slurp "/tmp/test-copy-merge/out"))))
+  (is (= "2\n1\n" (slurp "/tmp/test-copy-merge/out"))))
 
 (deftest test-crc-filename
   (is (= "/tmp/.0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2.crc"
@@ -164,3 +169,7 @@
     (is (= 2 (count paths)))
     (is (contains? (set paths) "file:/tmp/test-part-file-seq/part-00001"))
     (is (contains? (set paths) "file:/tmp/test-part-file-seq/part-00002"))))
+
+(deftest test-sequence-file-writer
+  (let [path "/tmp/test-sequence-file-writer"]
+    (is (instance? SequenceFile$Writer (sequence-file-writer path LongWritable LongWritable)))))

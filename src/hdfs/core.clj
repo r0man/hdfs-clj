@@ -4,6 +4,7 @@
            [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory]
            org.apache.hadoop.conf.Configuration
            org.apache.hadoop.io.SequenceFile$Reader
+           org.apache.hadoop.io.SequenceFile$Writer
            org.apache.hadoop.util.ReflectionUtils)
   (:require [clojure.java.io :refer [file delete-file]]
             [clojure.string :refer [join split]]))
@@ -18,6 +19,10 @@ and subsequent args as children relative to the parent."
      (Path. ^Path (make-path parent) ^String (str child)))
   ([parent child & more]
      (reduce make-path (make-path parent child) more)))
+
+(defn ^Configuration configuration
+  "Returns the Hadoop configuration."
+  [] (Configuration.))
 
 (defn ^FileSystem filesystem
   "Returns the Hadoop filesystem from `path`."
@@ -178,6 +183,15 @@ and subsequent args as children relative to the parent."
   (let [transform-fn (or transform-fn identity)]
     (with-open [writer (print-writer output)]
       (dorun (map #(.println writer (transform-fn %1)) lines)))))
+
+(defn ^SequenceFile$Writer sequence-file-writer
+  "Returns a sequence file writer for `key` and `val` classes."
+  [path key val]
+  (SequenceFile$Writer.
+   (filesystem path)
+   (configuration)
+   (make-path path)
+   key val))
 
 (defn sequence-file-seq
   "Returns the content of a sequence file as a lazy seq of key value
