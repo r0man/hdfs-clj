@@ -26,8 +26,8 @@ and subsequent args as children relative to the parent."
 
 (defn ^FileSystem filesystem
   "Returns the Hadoop filesystem from `path`."
-  [path & configuration]
-  (FileSystem/get (.toUri (make-path path)) (or configuration (Configuration.))))
+  [path & config]
+  (FileSystem/get (.toUri (make-path path)) (or config (configuration))))
 
 (defn make-directory
   "Make the given path and all non-existent parents into directories."
@@ -59,7 +59,7 @@ and subsequent args as children relative to the parent."
 
 (defn ^CompressionCodec compression-codec
   "Returns the compression codec for path."
-  [path] (.getCodec (CompressionCodecFactory. (Configuration.)) (make-path path)))
+  [path] (.getCodec (CompressionCodecFactory. (configuration)) (make-path path)))
 
 (defn copy-from-local-file
   "Copy the local file from `source` to `destination`."
@@ -88,7 +88,7 @@ and subsequent args as children relative to the parent."
      source-fs (make-path source-dir)
      destination-fs (make-path destination)
      (or delete-source false)
-     (Configuration.)
+     (configuration)
      nil)))
 
 (defn crc-filename [filename]
@@ -197,7 +197,7 @@ and subsequent args as children relative to the parent."
   "Returns the content of a sequence file as a lazy seq of key value
   tuples."
   [path]
-  (let [config (Configuration.)
+  (let [config (configuration)
         path (make-path path)
         reader (SequenceFile$Reader. (filesystem path) path config)]
     (letfn [(read []
