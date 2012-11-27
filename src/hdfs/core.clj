@@ -101,6 +101,10 @@ and subsequent args as children relative to the parent."
   (let [path (make-path pattern)]
     (seq (.globStatus (filesystem path) path))))
 
+(defn glob-paths
+  "Return a seq of Path objects that match `pattern` and are not checksum files."
+  [pattern] (map #(.getPath %1) (glob-status pattern)))
+
 (defn file-status
   "Returns a file status object that represents the path."
   [path]
@@ -193,9 +197,8 @@ and subsequent args as children relative to the parent."
    (make-path path)
    key val))
 
-(defn sequence-file-seq
-  "Returns the content of a sequence file as a lazy seq of key value
-  tuples."
+(defn sequence-file-seq*
+  "Returns the content of the sequence file at `path` as a lazy seq."
   [path]
   (let [config (configuration)
         path (make-path path)
@@ -208,3 +211,8 @@ and subsequent args as children relative to the parent."
                    (cons [key value] (read))
                    (do (.close reader) nil)))))]
       (read))))
+
+(defn sequence-file-seq
+  "Returns the concatenation of the content of all sequence files that
+  match `pattern` as a lazy seq."
+  [path] (apply concat (map sequence-file-seq* (glob-paths path))))

@@ -94,6 +94,15 @@
       (is (= 2 (count status)))
       (is (every? #(instance? FileStatus %1) status)))))
 
+(deftest test-glob-paths
+  (let [directory "/tmp/test-glob-paths"]
+    (make-directory directory)
+    (write-lines (str directory "/part-00000") "12")
+    (write-lines (str directory "/part-00001") "34")
+    (let [status (glob-paths (str directory "/*"))]
+      (is (= 2 (count status)))
+      (is (every? #(instance? Path %1) status)))))
+
 (deftest test-file-status
   (is (instance? FileStatus (file-status "project.clj"))))
 
