@@ -44,7 +44,10 @@
   (spit "/tmp/test-copy-merge/in/part-00000" "1\n")
   (spit "/tmp/test-copy-merge/in/part-00001" "2\n")
   (copy-merge "/tmp/test-copy-merge/in" "/tmp/test-copy-merge/out" :overwrite true)
-  (is (= "2\n1\n" (slurp "/tmp/test-copy-merge/out"))))
+  (let [content (slurp "/tmp/test-copy-merge/out")]
+    ;; TODO: Control order?
+    (is (or (= "1\n2\n")
+            (= "2\n1\n")))))
 
 (deftest test-crc-filename
   (is (= "/tmp/.0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2.crc"
@@ -119,17 +122,17 @@
   (let [status (list-file-status "/tmp/test-list-file-status")]
     (is (= 2 (count status)))
     (is (every? #(instance? FileStatus %1) status))
-    (is (= ["file:/tmp/test-list-file-status/2"
-            "file:/tmp/test-list-file-status/1"]
-           (map  #(str (.getPath %1)) status))))
+    (is (= #{"file:/tmp/test-list-file-status/2"
+             "file:/tmp/test-list-file-status/1"}
+           (set (map  #(str (.getPath %1)) status)))))
   (let [status (list-file-status "/tmp/test-list-file-status" true)]
     (is (= 4 (count status)))
     (is (every? #(instance? FileStatus %1) status))
-    (is (= ["file:/tmp/test-list-file-status/2"
-            "file:/tmp/test-list-file-status/2/b.txt"
-            "file:/tmp/test-list-file-status/1"
-            "file:/tmp/test-list-file-status/1/a.txt"]
-           (map  #(str (.getPath %1)) status)))))
+    (is (= #{"file:/tmp/test-list-file-status/2"
+             "file:/tmp/test-list-file-status/2/b.txt"
+             "file:/tmp/test-list-file-status/1"
+             "file:/tmp/test-list-file-status/1/a.txt"}
+           (set (map  #(str (.getPath %1)) status))))))
 
 (deftest test-make-path
   (is (thrown? IllegalArgumentException (make-path nil)))
