@@ -26,7 +26,7 @@ and subsequent args as children relative to the parent."
 
 (defn ^FileSystem filesystem
   "Returns the Hadoop filesystem from `path`."
-  [path & config]
+  [path & [config]]
   (FileSystem/get (.toUri (make-path path)) (or config (configuration))))
 
 (defn make-directory
