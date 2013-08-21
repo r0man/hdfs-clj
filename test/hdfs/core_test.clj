@@ -1,10 +1,11 @@
-(ns hdfs.test.core
+(ns hdfs.core-test
   (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
            [org.apache.hadoop.fs LocalFileSystem FileStatus FileSystem FSDataInputStream FSDataOutputStream Path]
            [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory BZip2Codec GzipCodec]
            org.apache.hadoop.conf.Configuration
            org.apache.hadoop.io.LongWritable
            org.apache.hadoop.io.SequenceFile$Writer)
+  (:refer-clojure :exclude [spit slurp])
   (:use [clojure.string :only (join)]
         clojure.test
         hdfs.core))
@@ -185,3 +186,13 @@
 (deftest test-sequence-file-writer
   (let [path "/tmp/test-sequence-file-writer"]
     (is (instance? SequenceFile$Writer (sequence-file-writer path LongWritable LongWritable)))))
+
+(deftest test-spit
+  (let [file "/tmp/test-spit"]
+    (spit file "x")
+    (is (= "x" (clojure.core/slurp file)))))
+
+(deftest test-slurp
+  (let [file "/tmp/test-slurp"]
+    (clojure.core/spit file "x")
+    (is (= "x" (slurp file)))))

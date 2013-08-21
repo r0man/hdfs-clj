@@ -6,6 +6,7 @@
            org.apache.hadoop.io.SequenceFile$Reader
            org.apache.hadoop.io.SequenceFile$Writer
            org.apache.hadoop.util.ReflectionUtils)
+  (:refer-clojure :exclude [spit slurp])
   (:require [clojure.java.io :refer [file delete-file]]
             [clojure.string :refer [join split]]))
 
@@ -216,3 +217,11 @@ and subsequent args as children relative to the parent."
   "Returns the concatenation of the content of all sequence files that
   match `pattern` as a lazy seq."
   [path] (apply concat (map sequence-file-seq* (glob-paths path))))
+
+(defn spit [f content & opts]
+  (with-open [w (output-stream f)]
+    (.writeBytes w content)))
+
+(defn slurp [f & opts]
+  (with-open [r (input-stream f)]
+    (clojure.core/slurp r)))
