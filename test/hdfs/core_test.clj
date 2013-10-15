@@ -196,3 +196,16 @@
   (let [file "/tmp/test-slurp"]
     (clojure.core/spit file "x")
     (is (= "x" (slurp file)))))
+
+(deftest test-with-fs-tmp
+  (let [files (atom {})]
+    (with-fs-tmp [fs file-1 file-2]
+      (is (string? file-1))
+      (is (string? file-2))
+      (spit file-1 "file-1")
+      (spit file-2 "file-2")
+      (swap! files assoc :file-1 file-1)
+      (swap! files assoc :file-2 file-2))
+    (let [{:keys [file-1 file-2]} @files]
+      (is (not (exists? file-1)))
+      (is (not (exists? file-2))))))

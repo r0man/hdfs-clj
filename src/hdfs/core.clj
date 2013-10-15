@@ -62,6 +62,29 @@ and subsequent args as children relative to the parent."
   "Returns the compression codec for path."
   [path] (.getCodec (CompressionCodecFactory. (configuration)) (make-path path)))
 
+(defn delete-all-fs [fs paths]
+  (dorun
+   (for [t paths]
+     (.delete fs (make-path t) true))))
+
+(defmacro with-fs-tmp
+  "Generates unique, temporary path names as subfolders of <root>/cascalog_reserved.
+  <root> by default will be '/tmp', but you can configure it via the
+  JobConf property `cascalog.io/tmp-dir-property`."
+  [[fs-sym & tmp-syms] & body]
+  (let [tmp-root (gensym "tmp-root")]
+    `(let [config# (configuration)
+           ~fs-sym (FileSystem/get config#)
+           ~tmp-root (.get config# "hadoop.tmp.dir" "/tmp")
+           ~@(mapcat (fn [t]
+                       [t `(str ~tmp-root "/" (java.util.UUID/randomUUID))])
+                     tmp-syms)]
+       (.mkdirs ~fs-sym (make-path ~tmp-root))
+       (try
+         ~@body
+         (finally
+           (delete-all-fs ~fs-sym ~(vec tmp-syms)))))))
+
 (defn copy-from-local-file
   "Copy the local file from `source` to `destination`."
   [source destination & {:keys [overwrite]}]
@@ -80,7 +103,7 @@ and subsequent args as children relative to the parent."
 
 (defn copy-merge
   "Copy all files in `source-dir` to the output file `destination`."
-  [source-dir destination & {:keys [delete-source overwrite]}]
+  [source-dir destination & {:keys [header delete-source overwrite]}]
   (let [source-fs (filesystem source-dir)
         destination-fs (filesystem destination)]
     (when overwrite
