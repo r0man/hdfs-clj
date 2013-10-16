@@ -47,8 +47,12 @@
   (copy-merge "/tmp/test-copy-merge/in" "/tmp/test-copy-merge/out" :overwrite true)
   (let [content (slurp "/tmp/test-copy-merge/out")]
     ;; TODO: Control order?
-    (is (or (= "1\n2\n")
-            (= "2\n1\n")))))
+    (is (or (= "1\n2\n" content)
+            (= "2\n1\n" content))))
+  (copy-merge "/tmp/test-copy-merge/in" "/tmp/test-copy-merge/out" :overwrite true :header "a\n")
+  (let [content (slurp "/tmp/test-copy-merge/out")]
+    (is (or (= "a\n1\n2\n" content)
+            (= "a\n2\n1\n" content)))))
 
 (deftest test-crc-filename
   (is (= "/tmp/.0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2.crc"

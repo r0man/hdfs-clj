@@ -7,7 +7,7 @@
            org.apache.hadoop.io.SequenceFile$Writer
            org.apache.hadoop.util.ReflectionUtils)
   (:refer-clojure :exclude [spit slurp])
-  (:require [clojure.java.io :refer [file delete-file]]
+  (:require [clojure.java.io :as io :refer [file delete-file]]
             [clojure.string :refer [join split]]))
 
 (defn ^Path make-path
@@ -101,20 +101,6 @@ and subsequent args as children relative to the parent."
     (.copyToLocalFile (filesystem source) source destination)
     [source destination]))
 
-(defn copy-merge
-  "Copy all files in `source-dir` to the output file `destination`."
-  [source-dir destination & {:keys [header delete-source overwrite]}]
-  (let [source-fs (filesystem source-dir)
-        destination-fs (filesystem destination)]
-    (when overwrite
-      (delete destination))
-    (FileUtil/copyMerge
-     source-fs (make-path source-dir)
-     destination-fs (make-path destination)
-     (or delete-source false)
-     (configuration)
-     nil)))
-
 (defn crc-filename [filename]
   (let [file (file filename)]
     (str (.getParent file) "/." (.getName file) ".crc")))
@@ -191,6 +177,26 @@ and subsequent args as children relative to the parent."
 (defn ^PrintWriter print-writer
   "Open `path` and return a BufferedWriter."
   [path] (PrintWriter. (output-stream path)))
+
+(defn copy-merge
+  "Copy all files in `source-dir` to the output file `destination`."
+  [source-dir destination & {:keys [header delete-source overwrite]}]
+  (let [source-fs (filesystem source-dir)
+        destination-fs (filesystem destination)]
+    (when overwrite
+      (delete destination))
+    (with-fs-tmp [fs tmp-destination]
+      (let [tmp-destination-fs (filesystem tmp-destination)]
+        (FileUtil/copyMerge
+         source-fs (make-path source-dir)
+         tmp-destination-fs (make-path tmp-destination)
+         (or delete-source false)
+         (configuration)
+         nil))
+      (with-open [input (input-stream tmp-destination)
+                  output (output-stream destination)]
+        (if header (.writeBytes output header))
+        (io/copy input output)))))
 
 (defn read-lines
   "Read lines from `input`."
