@@ -55,6 +55,7 @@
             (= "a\n2\n1\n" content)))))
 
 (deftest test-crc-filename
+  (is (nil? (crc-filename "/")))
   (is (= "/tmp/.0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2.crc"
          (crc-filename "/tmp/0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2"))))
 

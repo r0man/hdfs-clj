@@ -101,9 +101,18 @@ and subsequent args as children relative to the parent."
     (.copyToLocalFile (filesystem source) source destination)
     [source destination]))
 
-(defn crc-filename [filename]
-  (let [file (file filename)]
-    (str (.getParent file) "/." (.getName file) ".crc")))
+(defn crc-path
+  "Returns the path to the CRC file of `filename`."
+  [filename]
+  (let [path (make-path filename)]
+    (if-let [parent (.getParent path)]
+      (make-path parent (str "." (.getName path) ".crc")))))
+
+(defn crc-filename
+  "Returns the filename to the CRC file of `filename`."
+  [filename]
+  (if-let [path (crc-path filename)]
+    (str path)))
 
 (defn glob-status
   "Return all the files that match `pattern` and are not checksum files."
