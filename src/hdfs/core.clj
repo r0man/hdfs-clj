@@ -207,6 +207,18 @@ and subsequent args as children relative to the parent."
         (if header (.writeBytes output header))
         (io/copy input output)))))
 
+(defn copy-matching
+  "Copy all files matching `pattern` to the output file `destination`."
+  [pattern destination & {:keys [header delete-source overwrite]}]
+  (when overwrite (delete destination))
+  (with-open [output (output-stream destination)]
+    (if header (.writeBytes output header))
+    (doseq [status (glob-status pattern)
+            :when (not (.isDir status))]
+      (with-open [input (input-stream (.getPath status))]
+        (io/copy input output))
+      (if delete-source (delete (.getPath status))))))
+
 (defn read-lines
   "Read lines from `input`."
   [input] (line-seq (buffered-reader input)))

@@ -54,6 +54,21 @@
     (is (or (= "a\n1\n2\n" content)
             (= "a\n2\n1\n" content)))))
 
+(deftest test-copy-matching
+  (make-directory "/tmp/test-copy-matching/in")
+  (spit "/tmp/test-copy-matching/in/schema.edn" "SCHEMA")
+  (spit "/tmp/test-copy-matching/in/part-00000" "1\n")
+  (spit "/tmp/test-copy-matching/in/part-00001" "2\n")
+  (copy-matching "/tmp/test-copy-matching/in/part-*" "/tmp/test-copy-matching/out" :overwrite true)
+  (let [content (slurp "/tmp/test-copy-matching/out")]
+    ;; TODO: Control order?
+    (is (or (= "1\n2\n" content)
+            (= "2\n1\n" content))))
+  (copy-matching "/tmp/test-copy-matching/in/part-*" "/tmp/test-copy-matching/out" :overwrite true :header "a\n")
+  (let [content (slurp "/tmp/test-copy-matching/out")]
+    (is (or (= "a\n1\n2\n" content)
+            (= "a\n2\n1\n" content)))))
+
 (deftest test-crc-filename
   (is (nil? (crc-filename "/")))
   (is (= "/tmp/.0ac4d9d8-5dfe-4c37-980f-5bf4f5ced2e2.crc"
