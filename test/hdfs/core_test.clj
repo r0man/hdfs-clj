@@ -231,9 +231,7 @@
       (is (not (exists? file-2))))))
 
 (deftest test-qualified-path
-  (let [path (qualified-path "/tmp")]
-    (is (= "file" (.getScheme (.toUri path))))
-    (is (= "/tmp" (.getPath (.toUri path))))))
+  (is (= "file:///tmp" (qualified-path "/tmp"))))
 
 (deftest test-absolute-path
   (is (= (.getAbsolutePath (java.io.File. ""))

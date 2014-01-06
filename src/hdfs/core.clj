@@ -281,10 +281,11 @@ and subsequent args as children relative to the parent."
   [path & [config]]
   (let [path (make-path path)
         fs (.getFileSystem path (or config (configuration)))]
-    (.makeQualified path fs)))
+    (str (.toUri (.makeQualified path fs)))))
 
 (defn absolute-path
   "Returns the absolute `path`."
   [path & [config]]
-  (if-let [path (qualified-path path)]
-    (.getPath (.toUri path))))
+  (let [path (make-path path)
+        fs (.getFileSystem path (or config (configuration)))]
+    (.getPath (.toUri (.makeQualified path fs)))))
