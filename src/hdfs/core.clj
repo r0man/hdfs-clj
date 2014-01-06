@@ -275,3 +275,16 @@ and subsequent args as children relative to the parent."
 (defn slurp [f & opts]
   (with-open [r (input-stream f)]
     (clojure.core/slurp r)))
+
+(defn qualified-path
+  "Returns the qualified `path`."
+  [path & [config]]
+  (let [path (make-path path)
+        fs (.getFileSystem path (or config (configuration)))]
+    (.makeQualified path fs)))
+
+(defn absolute-path
+  "Returns the absolute `path`."
+  [path & [config]]
+  (if-let [path (qualified-path path)]
+    (.getPath (.toUri path))))

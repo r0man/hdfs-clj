@@ -229,3 +229,12 @@
     (let [{:keys [file-1 file-2]} @files]
       (is (not (exists? file-1)))
       (is (not (exists? file-2))))))
+
+(deftest test-qualified-path
+  (let [path (qualified-path "/tmp")]
+    (is (= "file" (.getScheme (.toUri path))))
+    (is (= "/tmp" (.getPath (.toUri path))))))
+
+(deftest test-absolute-path
+  (is (= (.getAbsolutePath (java.io.File. ""))
+         (absolute-path "."))))
