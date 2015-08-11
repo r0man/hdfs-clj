@@ -1,4 +1,4 @@
-(defproject dougselph/hdfs-clj "0.1.15"
+(defproject hdfs-clj "0.1.15"
   :description "A Clojure HDFS library."
   :url "https://github.com/r0man/hdfs-clj"
   :license {:name "Eclipse Public License"
