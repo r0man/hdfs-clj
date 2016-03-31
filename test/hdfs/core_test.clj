@@ -170,6 +170,7 @@
 
 (deftest test-make-parents
   (delete "/tmp/test-make-parents")
+  (is (not (make-parents "out.csv")))
   (is (not (make-parents "/")))
   (is (make-parents "/tmp/test-make-parents"))
   (is (not (exists? "/tmp/test-make-parents")))

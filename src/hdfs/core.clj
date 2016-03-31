@@ -8,18 +8,19 @@
            org.apache.hadoop.util.ReflectionUtils)
   (:refer-clojure :exclude [spit slurp])
   (:require [clojure.java.io :as io :refer [file delete-file]]
-            [clojure.string :refer [join split]]))
+            [clojure.string :refer [join split]]
+            [clojure.string :as str]))
 
 (defn ^Path make-path
   "Returns a org.apache.hadoop.fs.Path, passing each arg to
-make-path. Multiple-arg versions treat the first argument as parent
-and subsequent args as children relative to the parent."
+  make-path. Multiple-arg versions treat the first argument as parent
+  and subsequent args as children relative to the parent."
   ([arg]
-     (Path. (str arg)))
+   (Path. (str arg)))
   ([parent child]
-     (Path. ^Path (make-path parent) ^String (str child)))
+   (Path. ^Path (make-path parent) ^String (str child)))
   ([parent child & more]
-     (reduce make-path (make-path parent child) more)))
+   (reduce make-path (make-path parent child) more)))
 
 (defn ^Configuration configuration
   "Returns the Hadoop configuration."
@@ -38,9 +39,10 @@ and subsequent args as children relative to the parent."
   "Make the given path and all non-existent parents into directories."
   [path & [permissions]]
   (if-let [parent (.getParent (make-path path))]
-    (if permissions
-      (.mkdirs (filesystem parent) parent permissions)
-      (.mkdirs (filesystem parent) parent))))
+    (when-not (str/blank? (str parent))
+      (if permissions
+        (.mkdirs (filesystem parent) parent permissions)
+        (.mkdirs (filesystem parent) parent)))))
 
 (defn exists?
   "Returns true if `path` exists, otherwise false."
