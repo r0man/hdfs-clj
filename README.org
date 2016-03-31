@@ -1,0 +1,14 @@
+* hdfs-clj
+
+  [[https://clojars.org/hdfs-clj][https://img.shields.io/clojars/v/hdfs-clj.svg]]
+  [[https://travis-ci.org/r0man/hdfs-clj][https://travis-ci.org/r0man/hdfs-clj.svg]]
+  [[http://jarkeeper.com/r0man/hdfs-clj][http://jarkeeper.com/r0man/hdfs-clj/status.svg]]
+  [[http://jarkeeper.com/r0man/hdfs-clj][https://jarkeeper.com/r0man/hdfs-clj/downloads.svg]]
+
+  A [[https://clojure.org][Clojure]] library for the [[https://hadoop.apache.org/docs/stable/hadoop-project-dist/hadoop-hdfs/HdfsUserGuide.html][Hadoop Distributed File System]].
+
+** License
+
+   Copyright © 2013-2016 r0man
+
+   Distributed under the Eclipse Public License, the same as Clojure.
