@@ -1,14 +1,13 @@
 (ns hdfs.core-test
-  (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
-           [org.apache.hadoop.fs LocalFileSystem FileStatus FileSystem FSDataInputStream FSDataOutputStream Path]
-           [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory BZip2Codec GzipCodec]
-           org.apache.hadoop.conf.Configuration
-           org.apache.hadoop.io.LongWritable
-           org.apache.hadoop.io.SequenceFile$Writer)
   (:refer-clojure :exclude [spit slurp])
-  (:use [clojure.string :only (join)]
-        clojure.test
-        hdfs.core))
+  (:require [clojure.test :refer :all]
+            [hdfs.core :refer :all])
+  (:import [java.io BufferedReader BufferedWriter PrintWriter]
+           [org.apache.hadoop.conf Configuration]
+           [org.apache.hadoop.io SequenceFile$Reader SequenceFile$Writer]
+           [org.apache.hadoop.fs FileStatus FSDataInputStream FSDataOutputStream LocalFileSystem Path]
+           [org.apache.hadoop.io LongWritable SequenceFile]
+           [org.apache.hadoop.io.compress BZip2Codec GzipCodec]))
 
 (deftest test-buffered-reader
   (let [reader (buffered-reader "project.clj")]
@@ -93,7 +92,7 @@
   (let [path "/tmp/test-delete"]
     (is (not (delete path)))
     (spit path "x")
-    (is (delete path))))
+    (is (delete path true))))
 
 (deftest test-directory?
   (let [path "/tmp/test-directory?"]
@@ -134,7 +133,7 @@
   (is (pos? (file-size "project.clj"))))
 
 (deftest test-list-file-status
-  (delete "/tmp/test-list-file-status")
+  (delete "/tmp/test-list-file-status" true)
   (make-directory "/tmp/test-list-file-status")
   (make-directory "/tmp/test-list-file-status/1")
   (make-directory "/tmp/test-list-file-status/2")
@@ -169,7 +168,7 @@
   (is (make-directory "/tmp/make-directory/and-sub-directories")))
 
 (deftest test-make-parents
-  (delete "/tmp/test-make-parents")
+  (delete "/tmp/test-make-parents" true)
   (is (not (make-parents "out.csv")))
   (is (not (make-parents "/")))
   (is (make-parents "/tmp/test-make-parents"))

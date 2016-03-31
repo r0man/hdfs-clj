@@ -1,15 +1,13 @@
 (ns hdfs.core
-  (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
-           [org.apache.hadoop.fs FileSystem FileUtil FSDataInputStream FSDataOutputStream LocalFileSystem Path]
-           [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory]
-           org.apache.hadoop.conf.Configuration
-           org.apache.hadoop.io.SequenceFile$Reader
-           org.apache.hadoop.io.SequenceFile$Writer
-           org.apache.hadoop.util.ReflectionUtils)
   (:refer-clojure :exclude [spit slurp])
-  (:require [clojure.java.io :as io :refer [file delete-file]]
-            [clojure.string :refer [join split]]
-            [clojure.string :as str]))
+  (:require [clojure.java.io :as io]
+            [clojure.string :as str])
+  (:import [java.io BufferedReader BufferedWriter InputStreamReader OutputStreamWriter PrintWriter]
+           [org.apache.hadoop.conf Configuration]
+           [org.apache.hadoop.fs FileSystem FileUtil FSDataInputStream FSDataOutputStream Path]
+           [org.apache.hadoop.io SequenceFile SequenceFile$Reader]
+           [org.apache.hadoop.io.compress CompressionCodec CompressionCodecFactory]
+           [org.apache.hadoop.util ReflectionUtils]))
 
 (defn ^Path make-path
   "Returns a org.apache.hadoop.fs.Path, passing each arg to
@@ -46,11 +44,13 @@
 
 (defn exists?
   "Returns true if `path` exists, otherwise false."
-  [path] (.exists (filesystem path) (make-path path)))
+  [path]
+  (.exists (filesystem path) (make-path path)))
 
 (defn delete
   "Delete `path` recursively."
-  [path] (.delete (filesystem path) (make-path path)))
+  [path & [recursive]]
+  (.delete (filesystem path) (make-path path) (true? recursive)))
 
 (defn directory?
   "Returns true if `path` is a directory, otherwise false."
@@ -241,10 +241,10 @@
     (with-open [writer (print-writer output)]
       (dorun (map #(.println writer (transform-fn %1)) lines)))))
 
-(defn ^SequenceFile$Writer sequence-file-writer
+(defn sequence-file-writer
   "Returns a sequence file writer for `key` and `val` classes."
   [path key val]
-  (SequenceFile$Writer.
+  (SequenceFile/createWriter
    (filesystem path)
    (configuration)
    (make-path path)
@@ -283,11 +283,11 @@
   [path & [config]]
   (let [path (make-path path)
         fs (.getFileSystem path (or config (configuration)))]
-    (str (.toUri (.makeQualified path fs)))))
+    (str (.toUri (.makeQualified fs path)))))
 
 (defn absolute-path
   "Returns the absolute `path`."
   [path & [config]]
   (let [path (make-path path)
         fs (.getFileSystem path (or config (configuration)))]
-    (.getPath (.toUri (.makeQualified path fs)))))
+    (.getPath (.toUri (.makeQualified fs path)))))
